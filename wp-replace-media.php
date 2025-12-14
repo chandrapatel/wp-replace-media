@@ -1,11 +1,15 @@
 <?php
 /**
  * Plugin Name: WP Replace Media
+ * Plugin URI: https://github.com/chandrapatel/wp-replace-media
  * Description: Replace attachment files in-place while keeping URLs and thumbnails intact.
  * Version: 1.0.0
  * Author: Chandra Patel
+ * Author URI: https://chandra.dev
  * Text Domain: wp-replace-media
+ * Requires at least: 6.0
  * Requires PHP: 8.0
+ * Update URI: https://github.com/chandrapatel/wp-replace-media
  *
  * @package WP_Replace_Media
  */
