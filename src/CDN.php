@@ -13,11 +13,15 @@ namespace WP_Replace_Media;
  * CDN class.
  *
  * Handles CDN cache purge integrations for supported hosting platforms.
+ *
+ * @since 1.0.0
  */
 class CDN {
 
 	/**
 	 * Register WordPress hooks.
+	 *
+	 * @since 1.0.0
 	 */
 	public function register(): void {
 
@@ -26,6 +30,8 @@ class CDN {
 
 	/**
 	 * Purges attachment URLs from supported CDN providers.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id Attachment ID.
 	 * @param string $file_path     Local attachment path.
@@ -44,6 +50,8 @@ class CDN {
 	/**
 	 * Purges URLs through WPVIP edge cache integration.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param array<int,string> $urls URLs to purge.
 	 */
 	private function purge_wpvip_urls( array $urls ): void {
@@ -59,6 +67,8 @@ class CDN {
 
 	/**
 	 * Sanitizes URL list and removes duplicates.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array $size_urls Raw URL list.
 	 *

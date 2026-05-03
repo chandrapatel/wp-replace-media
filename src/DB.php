@@ -11,12 +11,16 @@ namespace WP_Replace_Media;
 
 /**
  * DB class.
+ *
+ * @since 1.0.0
  */
 class DB {
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 
 	/**
 	 * Returns the revisions table name.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @return string
 	 */
@@ -28,6 +32,8 @@ class DB {
 
 	/**
 	 * Creates/updates the revisions table schema.
+	 *
+	 * @since 1.0.0
 	 */
 	public static function create_table(): void {
 
@@ -60,6 +66,8 @@ class DB {
 
 	/**
 	 * Inserts a revision record.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array<string,mixed> $data Revision data.
 	 *
@@ -107,6 +115,8 @@ class DB {
 	/**
 	 * Gets revision rows for a single attachment.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $attachment_id Attachment ID.
 	 *
 	 * @return array<int,array<string,mixed>>
@@ -129,6 +139,8 @@ class DB {
 	/**
 	 * Gets a single revision by ID.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $revision_id Revision ID.
 	 *
 	 * @return array<string,mixed>|null
@@ -147,6 +159,8 @@ class DB {
 
 	/**
 	 * Gets a revision by ID limited to a single attachment.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param int $revision_id    Revision ID.
 	 * @param int $attachment_id  Attachment ID.
@@ -172,6 +186,8 @@ class DB {
 	/**
 	 * Marks a revision backup as deleted.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $revision_id Revision ID.
 	 *
 	 * @return bool
@@ -193,6 +209,8 @@ class DB {
 
 	/**
 	 * Checks if an attachment has at least one non-deleted backup.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param int $attachment_id Attachment ID.
 	 *

@@ -15,11 +15,15 @@ namespace WP_Replace_Media;
  * Reads the replacement timestamp stored by Replacer and adds it as a
  * `ver` query parameter to attachment URLs, image src arrays, and srcset
  * sources so browsers and CDNs see a fresh URL after a file is replaced.
+ *
+ * @since 1.0.0
  */
 class URL_Versioner {
 
 	/**
 	 * Register WordPress hooks.
+	 *
+	 * @since 1.0.0
 	 */
 	public function register(): void {
 
@@ -30,6 +34,8 @@ class URL_Versioner {
 
 	/**
 	 * Adds a version query param to the full attachment URL.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param string $url     Original attachment URL.
 	 * @param int    $post_id Attachment ID.
@@ -43,6 +49,8 @@ class URL_Versioner {
 
 	/**
 	 * Adds a version query param to attachment image sources (incl. intermediates).
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array|false $image         Image data array or false.
 	 * @param int         $attachment_id Attachment ID.
@@ -62,6 +70,8 @@ class URL_Versioner {
 
 	/**
 	 * Adds a version query param to each source in srcset arrays.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array  $sources       Srcset sources.
 	 * @param array  $size_array    Requested size array.
@@ -91,6 +101,8 @@ class URL_Versioner {
 	/**
 	 * Reads the stored replacement timestamp.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $post_id Attachment ID.
 	 *
 	 * @return string|null
@@ -108,6 +120,8 @@ class URL_Versioner {
 
 	/**
 	 * Appends the version query argument when available.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param string $url     URL to modify.
 	 * @param int    $post_id Attachment ID.

@@ -19,21 +19,29 @@ use WP_Error;
  * Validates submissions, overwrites the attachment file via WP_Filesystem,
  * regenerates metadata, updates timestamps, and stores the replacement
  * version used by URL_Versioner.
+ *
+ * @since 1.0.0
  */
 class Replacer {
 
 	/**
 	 * Post meta key for the replacement timestamp (UTC).
+	 *
+	 * @since 1.0.0
 	 */
 	public const VERSION_META_KEY = '_wrm_replaced_at';
 
 	/**
 	 * Post meta key for quick backup availability checks.
+	 *
+	 * @since 1.0.0
 	 */
 	public const HAS_BACKUP_META_KEY = '_wrm_has_backup';
 
 	/**
 	 * Backup service.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @var Backup
 	 */
@@ -41,6 +49,8 @@ class Replacer {
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param Backup|null $backup Backup service.
 	 */
@@ -50,6 +60,8 @@ class Replacer {
 
 	/**
 	 * Processes a submission from the Replace Media page.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param int    $post_id        Attachment ID.
 	 * @param string $existing_file  Existing file path.
@@ -203,6 +215,8 @@ class Replacer {
 	/**
 	 * Restores an attachment from a saved revision backup.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $attachment_id Attachment ID.
 	 * @param int $revision_id   Source revision ID.
 	 *
@@ -310,6 +324,8 @@ class Replacer {
 	/**
 	 * Deletes a backup file for a revision while keeping the revision row.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $attachment_id Attachment ID.
 	 * @param int $revision_id   Revision ID.
 	 *
@@ -365,6 +381,8 @@ class Replacer {
 	/**
 	 * Overwrites the destination file with the uploaded contents using WP_Filesystem.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param string $destination Existing attachment path.
 	 * @param string $temp_file   Temporary uploaded file path.
 	 *
@@ -395,6 +413,8 @@ class Replacer {
 	/**
 	 * Writes string content to a destination file via WP_Filesystem.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param string $destination Destination path.
 	 * @param string $content     File contents.
 	 *
@@ -416,6 +436,8 @@ class Replacer {
 
 	/**
 	 * Checks if the MIME type is allowed for replacement.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param string $mime_type MIME type to check.
 	 *
@@ -453,6 +475,8 @@ class Replacer {
 	/**
 	 * Checks if the current user has the capability to replace an attachment.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $attachment_id Attachment ID.
 	 *
 	 * @return bool
@@ -483,6 +507,8 @@ class Replacer {
 	/**
 	 * Gets URLs for all attachment sizes (full and sub-sizes).
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $attachment_id Attachment ID.
 	 *
 	 * @return array Array of size URLs.
@@ -512,6 +538,8 @@ class Replacer {
 
 	/**
 	 * Regenerates attachment metadata when required.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param int    $post_id      Attachment ID.
 	 * @param string $primary_path Full path to the main file.
@@ -544,6 +572,8 @@ class Replacer {
 	/**
 	 * Updates the attachment modified timestamps.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param int $post_id Attachment ID.
 	 */
 	private function update_modified_dates( int $post_id ): void {
@@ -562,6 +592,8 @@ class Replacer {
 
 	/**
 	 * Initialises and returns the global filesystem object.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @return \WP_Filesystem_Base|WP_Error
 	 */

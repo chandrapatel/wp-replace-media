@@ -13,11 +13,15 @@ use WP_Error;
 
 /**
  * Backup class.
+ *
+ * @since 1.0.0
  */
 class Backup {
 
 	/**
 	 * Creates a backup copy of an attachment before replacement.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id Attachment ID.
 	 * @param string $source_path   Original file absolute path.
@@ -79,6 +83,8 @@ class Backup {
 	/**
 	 * Builds an absolute backup path from a relative backup path.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param string $relative_path Relative path from uploads basedir.
 	 *
 	 * @return string|WP_Error
@@ -96,6 +102,8 @@ class Backup {
 
 	/**
 	 * Reads backup file contents from a relative backup path.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param string $relative_path Relative backup path.
 	 *
@@ -123,6 +131,8 @@ class Backup {
 
 	/**
 	 * Deletes a backup file using its relative path.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param string $relative_path Relative backup path.
 	 *
@@ -154,6 +164,8 @@ class Backup {
 	/**
 	 * Initialises and returns the global filesystem object.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @return \WP_Filesystem_Base|WP_Error
 	 */
 	private function get_filesystem() {
@@ -180,6 +192,8 @@ class Backup {
 
 	/**
 	 * Ensures a directory exists through WP_Filesystem.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param \WP_Filesystem_Base $filesystem Filesystem instance.
 	 * @param string              $directory  Absolute directory path.

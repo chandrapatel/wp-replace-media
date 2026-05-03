@@ -11,11 +11,15 @@ namespace WP_Replace_Media;
 
 /**
  * Revisions list table class.
+ *
+ * @since 1.0.0
  */
 class List_Table_Revisions extends \WP_List_Table {
 
 	/**
 	 * Attachment ID.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @var int
 	 */
@@ -24,12 +28,16 @@ class List_Table_Revisions extends \WP_List_Table {
 	/**
 	 * Base URL for actions.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @var string
 	 */
 	private string $base_url;
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id Attachment ID.
 	 * @param string $base_url      Base admin URL for action links.
@@ -51,6 +59,8 @@ class List_Table_Revisions extends \WP_List_Table {
 	/**
 	 * Column definitions.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @return array<string,string>
 	 */
 	public function get_columns(): array {
@@ -67,6 +77,8 @@ class List_Table_Revisions extends \WP_List_Table {
 
 	/**
 	 * Prepares table items.
+	 *
+	 * @since 1.0.0
 	 */
 	public function prepare_items(): void {
 
@@ -76,6 +88,8 @@ class List_Table_Revisions extends \WP_List_Table {
 
 	/**
 	 * Renders default columns.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array<string,mixed> $item        Row data.
 	 * @param string              $column_name Column name.
@@ -113,6 +127,8 @@ class List_Table_Revisions extends \WP_List_Table {
 	/**
 	 * Renders backup file column.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param array<string,mixed> $item Row data.
 	 *
 	 * @return string
@@ -146,6 +162,8 @@ class List_Table_Revisions extends \WP_List_Table {
 
 	/**
 	 * Renders row action links.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array<string,mixed> $item Row data.
 	 *
@@ -198,6 +216,8 @@ class List_Table_Revisions extends \WP_List_Table {
 
 	/**
 	 * Empty state text.
+	 *
+	 * @since 1.0.0
 	 */
 	public function no_items(): void {
 		echo esc_html__( 'No revisions yet. Revisions are created automatically each time you replace this file.', 'wp-replace-media' );

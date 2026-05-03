@@ -17,11 +17,15 @@ use WP_Post;
  * Owns the hidden submenu under Media, the "Replace" row action, and the
  * Replace Media page rendering. Delegates the actual replacement work to
  * a Replacer instance.
+ *
+ * @since 1.0.0
  */
 class Admin_Page {
 
 	/**
 	 * Replacer service.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @var Replacer
 	 */
@@ -30,12 +34,16 @@ class Admin_Page {
 	/**
 	 * Registered admin page hook suffix.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @var string
 	 */
 	private string $page_hook = '';
 
 	/**
 	 * Constructor.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param Replacer $replacer Replacer service.
 	 */
@@ -45,6 +53,8 @@ class Admin_Page {
 
 	/**
 	 * Register WordPress hooks.
+	 *
+	 * @since 1.0.0
 	 */
 	public function register(): void {
 
@@ -57,6 +67,8 @@ class Admin_Page {
 
 	/**
 	 * Builds the replace page URL for an attachment.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param int $attachment_id Attachment ID.
 	 *
@@ -78,6 +90,8 @@ class Admin_Page {
 
 	/**
 	 * Registers the hidden submenu under Media for Replace Media.
+	 *
+	 * @since 1.0.0
 	 */
 	public function register_submenu(): void {
 
@@ -101,6 +115,8 @@ class Admin_Page {
 	/**
 	 * Enqueues plugin assets only on the replace page.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param string $hook Current admin screen hook.
 	 */
 	public function enqueue_assets( string $hook ): void {
@@ -119,6 +135,8 @@ class Admin_Page {
 
 	/**
 	 * Handles request-level revision actions before page output begins.
+	 *
+	 * @since 1.0.0
 	 */
 	public function handle_page_load(): void {
 
@@ -159,6 +177,8 @@ class Admin_Page {
 
 	/**
 	 * Renders the redirect notice for revision actions.
+	 *
+	 * @since 1.0.0
 	 */
 	private function render_redirect_notice(): void {
 
@@ -178,6 +198,8 @@ class Admin_Page {
 
 	/**
 	 * Adds the "Replace" quick action to Media list rows.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array   $actions Existing actions.
 	 * @param WP_Post $post    Attachment post.
@@ -212,6 +234,8 @@ class Admin_Page {
 	/**
 	 * Registers the attachment edit screen meta box entry point.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param WP_Post $post Attachment post.
 	 */
 	public function add_attachment_metabox( WP_Post $post ): void {
@@ -237,6 +261,8 @@ class Admin_Page {
 	/**
 	 * Renders the attachment edit-screen meta box.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param WP_Post $post Attachment post.
 	 */
 	public function render_attachment_metabox( WP_Post $post ): void {
@@ -252,6 +278,8 @@ class Admin_Page {
 
 	/**
 	 * Adds a replace button in the media grid modal details form.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array<string,mixed> $form_fields Existing form fields.
 	 * @param WP_Post             $post        Attachment post.
@@ -285,6 +313,8 @@ class Admin_Page {
 
 	/**
 	 * Renders the Replace Media submenu page.
+	 *
+	 * @since 1.0.0
 	 */
 	public function render(): void {
 

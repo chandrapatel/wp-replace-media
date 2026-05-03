@@ -13,11 +13,15 @@ namespace WP_Replace_Media;
  * Plugin class.
  *
  * Single entry point for registering all plugin hooks.
+ *
+ * @since 1.0.0
  */
 class Plugin {
 
 	/**
 	 * Singleton instance of the plugin.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @var self|null
 	 */
@@ -25,6 +29,8 @@ class Plugin {
 
 	/**
 	 * Activation callback.
+	 *
+	 * @since 1.0.0
 	 */
 	public static function activate(): void {
 
@@ -33,6 +39,8 @@ class Plugin {
 
 	/**
 	 * Initialise the plugin (called once on plugins_loaded).
+	 *
+	 * @since 1.0.0
 	 */
 	public static function init(): void {
 
@@ -46,6 +54,8 @@ class Plugin {
 
 	/**
 	 * Register all feature hooks.
+	 *
+	 * @since 1.0.0
 	 */
 	private function setup(): void {
 
@@ -59,6 +69,8 @@ class Plugin {
 
 	/**
 	 * Loads the plugin text domain for internationalization.
+	 *
+	 * @since 1.0.0
 	 */
 	public function load_textdomain(): void {
 

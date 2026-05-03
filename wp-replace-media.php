@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WP Replace Media
- * Description: Replace attachment files in-place while keeping URLs and thumbnails intact.
+ * Description: Replace attachment files in-place while keeping URLs and thumbnails intact. Includes automatic backups, a revisions log with restore, MIME type enforcement, cache-busting `ver` URLs, and built-in WPVIP edge cache purge.
  * Version:     1.0.0
  * Author:      Chandra Patel
  * Author URI:  https://chandra.dev
