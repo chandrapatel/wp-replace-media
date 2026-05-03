@@ -1,0 +1,120 @@
+# Copyright (C) YEAR Chandra Patel
+# This file is distributed under the same license as the WP Replace Media package.
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Replace Media 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/chandrapatel/wp-replace-media/issues\n"
+"POT-Creation-Date: 2026-05-03 00:00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/Admin_Page.php:55
+#: src/Admin_Page.php:56
+msgid "Replace Media"
+msgstr ""
+
+#: src/Admin_Page.php:136
+msgid "Replace"
+msgstr ""
+
+#: src/Admin_Page.php:151
+msgid "Invalid request."
+msgstr ""
+
+#: src/Admin_Page.php:158
+msgid "You are not allowed to replace this file."
+msgstr ""
+
+#: src/Admin_Page.php:165
+#: src/Admin_Page.php:200
+#: src/Admin_Page.php:209
+msgid "Replace Media"
+msgstr ""
+
+#: src/Admin_Page.php:168
+msgid "This file type cannot be replaced. Only images and PDFs are supported."
+msgstr ""
+
+#: src/Admin_Page.php:179
+#: src/Admin_Page.php:217
+msgid "Unknown"
+msgstr ""
+
+#: src/Admin_Page.php:201
+msgid "No file is currently linked to this attachment."
+msgstr ""
+
+#: src/Admin_Page.php:212
+msgid "Current file"
+msgstr ""
+
+#: src/Admin_Page.php:216
+msgid "Type"
+msgstr ""
+
+#: src/Admin_Page.php:220
+msgid "Size"
+msgstr ""
+
+#: src/Admin_Page.php:225
+msgid "Upload a replacement file that matches the current file type. The existing URL will stay the same."
+msgstr ""
+
+#: src/Admin_Page.php:228
+msgid "The original file name is reused so links remain unchanged."
+msgstr ""
+
+#: src/Admin_Page.php:229
+msgid "Images will regenerate thumbnails after replacement."
+msgstr ""
+
+#: src/Admin_Page.php:230
+msgid "This action cannot be undone automatically, so keep a backup."
+msgstr ""
+
+#: src/Admin_Page.php:237
+msgid "Select replacement file"
+msgstr ""
+
+#: src/Admin_Page.php:242
+msgid "Replace"
+msgstr ""
+
+#: src/Replacer.php:49
+msgid "Please select a file to upload."
+msgstr ""
+
+#: src/Replacer.php:59
+msgid "You are not allowed to replace this file."
+msgstr ""
+
+#: src/Replacer.php:67
+msgid "This file type cannot be replaced. Only images and PDFs are supported."
+msgstr ""
+
+#: src/Replacer.php:76
+msgid "There was an error uploading the replacement file."
+msgstr ""
+
+#: src/Replacer.php:85
+msgid "Invalid upload. Please try again."
+msgstr ""
+
+#: src/Replacer.php:94
+msgid "Please choose a file with the same MIME type as the original."
+msgstr ""
+
+#: src/Replacer.php:139
+msgid "Media file replaced successfully."
+msgstr ""
+
+#: src/Replacer.php:167
+msgid "Failed to read the uploaded file."
+msgstr ""
+
+#: src/Replacer.php:173
+msgid "Failed to replace the existing file."
+msgstr ""

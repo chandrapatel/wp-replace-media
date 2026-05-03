@@ -41,7 +41,22 @@ class Plugin {
 	 */
 	private function setup(): void {
 
+		// Load plugin text domain for i18n.
+		add_action( 'init', [ $this, 'load_textdomain' ] );
+
 		( new Admin_Page( new Replacer() ) )->register();
 		( new URL_Versioner() )->register();
+	}
+
+	/**
+	 * Loads the plugin text domain for internationalization.
+	 */
+	public function load_textdomain(): void {
+
+		load_plugin_textdomain(
+			'wp-replace-media',
+			false,
+			dirname( plugin_basename( WP_REPLACE_MEDIA_PLUGIN_FILE ) ) . '/languages'
+		);
 	}
 }

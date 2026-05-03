@@ -25,7 +25,7 @@ class Replacer {
 	/**
 	 * Post meta key for the replacement timestamp (UTC).
 	 */
-	public const VERSION_META_KEY = '_wp_replace_media_replaced';
+	public const VERSION_META_KEY = '_wrm_replaced_at';
 
 	/**
 	 * Processes a submission from the Replace Media page.
@@ -45,10 +45,18 @@ class Replacer {
 			];
 		}
 
-		if ( ! current_user_can( 'upload_files' ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		if ( ! self::current_user_can_replace( $post_id ) ) {
 			return [
 				'type'    => 'error',
 				'message' => __( 'You are not allowed to replace this file.', 'wp-replace-media' ),
+			];
+		}
+
+		// Check if MIME type is allowed.
+		if ( ! self::is_allowed_mime_type( $existing_mime ) ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'This file type cannot be replaced. Only images and PDFs are supported.', 'wp-replace-media' ),
 			];
 		}
 
@@ -79,6 +87,17 @@ class Replacer {
 			];
 		}
 
+		/**
+		 * Fires before a media file is replaced.
+		 *
+		 * Callbacks can call wp_die() to abort the operation.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $attachment_id The attachment ID being replaced.
+		 */
+		do_action( 'wp_replace_media_pre_replace', $post_id );
+
 		$is_replaced = $this->replace_file_contents( $existing_file, $temp_file );
 
 		if ( is_wp_error( $is_replaced ) ) {
@@ -88,12 +107,41 @@ class Replacer {
 			];
 		}
 
+		// Build list of size URLs for CDN purge.
+		$size_urls = $this->get_attachment_size_urls( $post_id );
+
+		/**
+		 * Fires after a media file is replaced.
+		 *
+		 * Fires after the file is written and before metadata regeneration.
+		 * Use this hook to purge CDN caches or sync files to remote storage.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int    $attachment_id The attachment ID.
+		 * @param string $file_path     The path to the attachment file.
+		 * @param array  $size_urls     Array of URLs for all attachment sizes (full + sub-sizes).
+		 */
+		do_action( 'wp_replace_media_file_replaced', $post_id, $existing_file, $size_urls );
+
 		$this->refresh_attachment_metadata( $post_id, $existing_file, $existing_mime );
+
 		$this->update_modified_dates( $post_id );
 
 		// Save replacement timestamp in UTC for cache-busting URLs.
 		$current_utc_time = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 		update_post_meta( $post_id, self::VERSION_META_KEY, $current_utc_time->getTimestamp() );
+
+		/**
+		 * Fires after a media file replacement is complete.
+		 *
+		 * Fires after all database and metadata updates are done.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $attachment_id The attachment ID.
+		 */
+		do_action( 'wp_replace_media_completed', $post_id );
 
 		return [
 			'type'    => 'success',
@@ -135,6 +183,98 @@ class Replacer {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks if the MIME type is allowed for replacement.
+	 *
+	 * @param string $mime_type MIME type to check.
+	 *
+	 * @return bool
+	 */
+	public static function is_allowed_mime_type( string $mime_type ): bool {
+
+		if ( ! $mime_type ) {
+			return false;
+		}
+
+		/**
+		 * Filters the allowed MIME type prefixes for replacement.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param array $allowed_types Array of MIME type prefixes to allow. Default: [ 'image', 'application/pdf' ].
+		 *                              Matches are done via str_starts_with(), so 'image' matches 'image/jpeg', etc.
+		 */
+		$allowed_types = apply_filters(
+			'wp_replace_media_allowed_types',
+			[ 'image', 'application/pdf' ]
+		);
+
+		// Check if MIME type starts with one of the allowed prefixes or matches exactly.
+		foreach ( (array) $allowed_types as $allowed ) {
+			if ( str_starts_with( $mime_type, $allowed ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if the current user has the capability to replace an attachment.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 *
+	 * @return bool
+	 */
+	public static function current_user_can_replace( int $attachment_id ): bool {
+
+		/**
+		 * Filters the required capability for replacing media.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $cap           The required capability. Default 'upload_files'.
+		 * @param int    $attachment_id The attachment ID.
+		 */
+		$required_cap = apply_filters( 'wp_replace_media_capability', 'upload_files', $attachment_id );
+
+		if ( empty( $required_cap ) || ! is_string( $required_cap ) ) {
+			return false;
+		}
+
+		return current_user_can( $required_cap );
+	}
+
+	/**
+	 * Gets URLs for all attachment sizes (full and sub-sizes).
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 *
+	 * @return array Array of size URLs.
+	 */
+	private function get_attachment_size_urls( int $attachment_id ): array {
+
+		$size_urls = [];
+
+		// Full-size URL.
+		$full_url = wp_get_attachment_url( $attachment_id );
+		if ( $full_url ) {
+			$size_urls[] = $full_url;
+		}
+
+		// Sub-size URLs.
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+			foreach ( $metadata['sizes'] as $size ) {
+				if ( isset( $size['url'] ) ) {
+					$size_urls[] = $size['url'];
+				}
+			}
+		}
+
+		return $size_urls;
 	}
 
 	/**

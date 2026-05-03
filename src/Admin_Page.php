@@ -73,7 +73,16 @@ class Admin_Page {
 	 */
 	public function add_media_row_action( array $actions, WP_Post $post ): array {
 
-		if ( 'attachment' !== $post->post_type || ! current_user_can( 'upload_files' ) ) {
+		if ( 'attachment' !== $post->post_type ) {
+			return $actions;
+		}
+
+		if ( ! Replacer::current_user_can_replace( (int) $post->ID ) ) {
+			return $actions;
+		}
+
+		// Check if attachment MIME type is allowed for replacement.
+		if ( ! Replacer::is_allowed_mime_type( get_post_mime_type( $post->ID ) ) ) {
 			return $actions;
 		}
 
@@ -108,13 +117,30 @@ class Admin_Page {
 			wp_die( esc_html__( 'Invalid request.', 'wp-replace-media' ) );
 		}
 
-		if ( ! current_user_can( 'upload_files' ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
+		if ( ! Replacer::current_user_can_replace( $attachment_id ) ) {
 			wp_die( esc_html__( 'You are not allowed to replace this file.', 'wp-replace-media' ) );
 		}
 
-		$attachment    = get_post( $attachment_id );
+		// Get attachment MIME type.
+		$attachment = get_post( $attachment_id );
+		$mime_type  = $attachment ? get_post_mime_type( $attachment ) : '';
+
+		// Check if attachment MIME type is allowed for replacement.
+		if ( ! Replacer::is_allowed_mime_type( $mime_type ) ) {
+			?>
+			<div class="wrap">
+				<h1><?php echo esc_html__( 'Replace Media', 'wp-replace-media' ); ?></h1>
+				<div class="notice notice-error"><p>
+					<?php
+					echo esc_html__( 'This file type cannot be replaced. Only images and PDFs are supported.', 'wp-replace-media' );
+					?>
+				</p></div>
+			</div>
+			<?php
+			return;
+		}
+
 		$attached_file = get_attached_file( $attachment_id );
-		$mime_type     = $attachment ? get_post_mime_type( $attachment ) : '';
 		$file_size     = ( $attached_file && file_exists( $attached_file ) ) ? size_format( filesize( $attached_file ) ) : __( 'Unknown', 'wp-replace-media' );
 
 		if (
