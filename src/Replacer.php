@@ -28,6 +28,27 @@ class Replacer {
 	public const VERSION_META_KEY = '_wrm_replaced_at';
 
 	/**
+	 * Post meta key for quick backup availability checks.
+	 */
+	public const HAS_BACKUP_META_KEY = '_wrm_has_backup';
+
+	/**
+	 * Backup service.
+	 *
+	 * @var Backup
+	 */
+	private Backup $backup;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Backup|null $backup Backup service.
+	 */
+	public function __construct( ?Backup $backup = null ) {
+		$this->backup = $backup ?? new Backup();
+	}
+
+	/**
 	 * Processes a submission from the Replace Media page.
 	 *
 	 * @param int    $post_id        Attachment ID.
@@ -69,9 +90,9 @@ class Replacer {
 			];
 		}
 
-		$temp_file = $upload_file['tmp_name'];
+		$temp_file = (string) $upload_file['tmp_name'];
 
-		if ( ! file_exists( $temp_file ) || ! is_uploaded_file( $temp_file ) ) {
+		if ( empty( $temp_file ) || ! is_uploaded_file( $temp_file ) ) {
 			return [
 				'type'    => 'error',
 				'message' => __( 'Invalid upload. Please try again.', 'wp-replace-media' ),
@@ -97,6 +118,14 @@ class Replacer {
 		 * @param int $attachment_id The attachment ID being replaced.
 		 */
 		do_action( 'wp_replace_media_pre_replace', $post_id );
+
+		$backup = $this->backup->create_backup( $post_id, $existing_file );
+		if ( is_wp_error( $backup ) ) {
+			return [
+				'type'    => 'error',
+				'message' => $backup->get_error_message(),
+			];
+		}
 
 		$is_replaced = $this->replace_file_contents( $existing_file, $temp_file );
 
@@ -128,9 +157,30 @@ class Replacer {
 
 		$this->update_modified_dates( $post_id );
 
+		$revision_id = DB::insert_revision(
+			[
+				'attachment_id' => $post_id,
+				'user_id'       => get_current_user_id(),
+				'replaced_at'   => gmdate( 'Y-m-d H:i:s' ),
+				'filename'      => (string) $backup['filename'],
+				'filesize'      => (int) $backup['original_size'],
+				'mime_type'     => $existing_mime,
+				'backup_path'   => (string) $backup['backup_path'],
+				'backup_size'   => (int) $backup['backup_size'],
+			]
+		);
+
+		if ( $revision_id < 1 ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'File replaced, but the revision log could not be saved.', 'wp-replace-media' ),
+			];
+		}
+
 		// Save replacement timestamp in UTC for cache-busting URLs.
 		$current_utc_time = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 		update_post_meta( $post_id, self::VERSION_META_KEY, $current_utc_time->getTimestamp() );
+		update_post_meta( $post_id, self::HAS_BACKUP_META_KEY, 1 );
 
 		/**
 		 * Fires after a media file replacement is complete.
@@ -140,12 +190,175 @@ class Replacer {
 		 * @since 1.0.0
 		 *
 		 * @param int $attachment_id The attachment ID.
+		 * @param int $revision_id   The revision row ID.
 		 */
-		do_action( 'wp_replace_media_completed', $post_id );
+		do_action( 'wp_replace_media_completed', $post_id, $revision_id );
 
 		return [
 			'type'    => 'success',
 			'message' => __( 'Media file replaced successfully.', 'wp-replace-media' ),
+		];
+	}
+
+	/**
+	 * Restores an attachment from a saved revision backup.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @param int $revision_id   Source revision ID.
+	 *
+	 * @return array{type:string,message:string}
+	 */
+	public function restore_revision( int $attachment_id, int $revision_id ): array {
+
+		if ( ! self::current_user_can_replace( $attachment_id ) ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'You are not allowed to restore this file.', 'wp-replace-media' ),
+			];
+		}
+
+		$revision = DB::get_revision_for_attachment( $revision_id, $attachment_id );
+		if ( ! $revision ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'Selected revision could not be found.', 'wp-replace-media' ),
+			];
+		}
+
+		if ( ! empty( $revision['is_backup_deleted'] ) ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'This revision backup was deleted and cannot be restored.', 'wp-replace-media' ),
+			];
+		}
+
+		$backup_contents = $this->backup->read_backup( (string) $revision['backup_path'] );
+		if ( is_wp_error( $backup_contents ) ) {
+			return [
+				'type'    => 'error',
+				'message' => $backup_contents->get_error_message(),
+			];
+		}
+
+		$current_file = (string) get_attached_file( $attachment_id );
+		if ( '' === $current_file ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'No file is currently linked to this attachment.', 'wp-replace-media' ),
+			];
+		}
+
+		$current_mime = (string) get_post_mime_type( $attachment_id );
+
+		do_action( 'wp_replace_media_pre_replace', $attachment_id );
+
+		$backup = $this->backup->create_backup( $attachment_id, $current_file );
+		if ( is_wp_error( $backup ) ) {
+			return [
+				'type'    => 'error',
+				'message' => $backup->get_error_message(),
+			];
+		}
+
+		$written = $this->write_file_contents( $current_file, $backup_contents );
+		if ( is_wp_error( $written ) ) {
+			return [
+				'type'    => 'error',
+				'message' => $written->get_error_message(),
+			];
+		}
+
+		$size_urls = $this->get_attachment_size_urls( $attachment_id );
+		do_action( 'wp_replace_media_file_replaced', $attachment_id, $current_file, $size_urls );
+
+		$this->refresh_attachment_metadata( $attachment_id, $current_file, $current_mime );
+		$this->update_modified_dates( $attachment_id );
+
+		$new_revision_id = DB::insert_revision(
+			[
+				'attachment_id'    => $attachment_id,
+				'user_id'          => get_current_user_id(),
+				'replaced_at'      => gmdate( 'Y-m-d H:i:s' ),
+				'filename'         => (string) $backup['filename'],
+				'filesize'         => (int) $backup['original_size'],
+				'mime_type'        => $current_mime,
+				'backup_path'      => (string) $backup['backup_path'],
+				'backup_size'      => (int) $backup['backup_size'],
+				'restored_from_id' => $revision_id,
+			]
+		);
+
+		if ( $new_revision_id < 1 ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'File restored, but the revision log could not be saved.', 'wp-replace-media' ),
+			];
+		}
+
+		$current_utc_time = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+		update_post_meta( $attachment_id, self::VERSION_META_KEY, $current_utc_time->getTimestamp() );
+		update_post_meta( $attachment_id, self::HAS_BACKUP_META_KEY, 1 );
+
+		do_action( 'wp_replace_media_completed', $attachment_id, $new_revision_id );
+
+		return [
+			'type'    => 'success',
+			'message' => __( 'Revision restored successfully.', 'wp-replace-media' ),
+		];
+	}
+
+	/**
+	 * Deletes a backup file for a revision while keeping the revision row.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @param int $revision_id   Revision ID.
+	 *
+	 * @return array{type:string,message:string}
+	 */
+	public function delete_revision_backup( int $attachment_id, int $revision_id ): array {
+
+		if ( ! self::current_user_can_replace( $attachment_id ) ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'You are not allowed to delete this backup.', 'wp-replace-media' ),
+			];
+		}
+
+		$revision = DB::get_revision_for_attachment( $revision_id, $attachment_id );
+		if ( ! $revision ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'Selected revision could not be found.', 'wp-replace-media' ),
+			];
+		}
+
+		if ( ! empty( $revision['is_backup_deleted'] ) ) {
+			return [
+				'type'    => 'success',
+				'message' => __( 'Backup was already deleted.', 'wp-replace-media' ),
+			];
+		}
+
+		$deleted = $this->backup->delete_backup( (string) $revision['backup_path'] );
+		if ( is_wp_error( $deleted ) ) {
+			return [
+				'type'    => 'error',
+				'message' => $deleted->get_error_message(),
+			];
+		}
+
+		if ( ! DB::mark_backup_deleted( $revision_id ) ) {
+			return [
+				'type'    => 'error',
+				'message' => __( 'Backup file was deleted, but revision state could not be updated.', 'wp-replace-media' ),
+			];
+		}
+
+		update_post_meta( $attachment_id, self::HAS_BACKUP_META_KEY, DB::has_active_backup( $attachment_id ) ? 1 : 0 );
+
+		return [
+			'type'    => 'success',
+			'message' => __( 'Backup deleted successfully.', 'wp-replace-media' ),
 		];
 	}
 
@@ -159,15 +372,9 @@ class Replacer {
 	 */
 	private function replace_file_contents( string $destination, string $temp_file ): bool|WP_Error {
 
-		global $wp_filesystem;
-
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-
-		if ( ! is_a( $wp_filesystem, 'WP_Filesystem_Base' ) ) {
-			$creds = request_filesystem_credentials( site_url() );
-			WP_Filesystem( $creds );
+		$wp_filesystem = $this->get_filesystem();
+		if ( is_wp_error( $wp_filesystem ) ) {
+			return $wp_filesystem;
 		}
 
 		$file_contents = $wp_filesystem->get_contents( $temp_file );
@@ -180,6 +387,28 @@ class Replacer {
 
 		if ( ! $result ) {
 			return new WP_Error( 'wrm_write_error', __( 'Failed to replace the existing file.', 'wp-replace-media' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Writes string content to a destination file via WP_Filesystem.
+	 *
+	 * @param string $destination Destination path.
+	 * @param string $content     File contents.
+	 *
+	 * @return true|WP_Error
+	 */
+	private function write_file_contents( string $destination, string $content ): bool|WP_Error {
+
+		$wp_filesystem = $this->get_filesystem();
+		if ( is_wp_error( $wp_filesystem ) ) {
+			return $wp_filesystem;
+		}
+
+		if ( ! $wp_filesystem->put_contents( $destination, $content, FS_CHMOD_FILE ) ) {
+			return new WP_Error( 'wrm_write_error', __( 'Failed to restore the selected backup file.', 'wp-replace-media' ) );
 		}
 
 		return true;
@@ -244,7 +473,11 @@ class Replacer {
 			return false;
 		}
 
-		return current_user_can( $required_cap );
+		if ( ! current_user_can( $required_cap ) ) {
+			return false;
+		}
+
+		return current_user_can( 'edit_post', $attachment_id );
 	}
 
 	/**
@@ -300,8 +533,9 @@ class Replacer {
 			$metadata = [];
 		}
 
-		if ( file_exists( $primary_path ) ) {
-			$metadata['filesize'] = (int) filesize( $primary_path );
+		$wp_filesystem = $this->get_filesystem();
+		if ( ! is_wp_error( $wp_filesystem ) && $wp_filesystem->exists( $primary_path ) ) {
+			$metadata['filesize'] = max( 0, (int) $wp_filesystem->size( $primary_path ) );
 		}
 
 		wp_update_attachment_metadata( $post_id, $metadata );
@@ -324,5 +558,32 @@ class Replacer {
 				'post_modified_gmt' => $gmt_time,
 			]
 		);
+	}
+
+	/**
+	 * Initialises and returns the global filesystem object.
+	 *
+	 * @return \WP_Filesystem_Base|WP_Error
+	 */
+	private function get_filesystem() {
+
+		global $wp_filesystem;
+
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		if ( ! is_a( $wp_filesystem, 'WP_Filesystem_Base' ) && ! WP_Filesystem() ) {
+			$creds = request_filesystem_credentials( site_url() );
+			if ( false === $creds || ! WP_Filesystem( $creds ) ) {
+				return new WP_Error( 'wrm_filesystem_init', __( 'Filesystem access is not available.', 'wp-replace-media' ) );
+			}
+		}
+
+		if ( ! is_a( $wp_filesystem, 'WP_Filesystem_Base' ) ) {
+			return new WP_Error( 'wrm_filesystem_init', __( 'Filesystem access is not available.', 'wp-replace-media' ) );
+		}
+
+		return $wp_filesystem;
 	}
 }

@@ -8,6 +8,9 @@ $baseDir = dirname($vendorDir);
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'WP_Replace_Media\\Admin_Page' => $baseDir . '/src/Admin_Page.php',
+    'WP_Replace_Media\\Backup' => $baseDir . '/src/Backup.php',
+    'WP_Replace_Media\\DB' => $baseDir . '/src/DB.php',
+    'WP_Replace_Media\\List_Table_Revisions' => $baseDir . '/src/List_Table_Revisions.php',
     'WP_Replace_Media\\Plugin' => $baseDir . '/src/Plugin.php',
     'WP_Replace_Media\\Replacer' => $baseDir . '/src/Replacer.php',
     'WP_Replace_Media\\URL_Versioner' => $baseDir . '/src/URL_Versioner.php',

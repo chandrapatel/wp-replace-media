@@ -24,6 +24,14 @@ class Plugin {
 	private static ?self $instance = null;
 
 	/**
+	 * Activation callback.
+	 */
+	public static function activate(): void {
+
+		DB::create_table();
+	}
+
+	/**
 	 * Initialise the plugin (called once on plugins_loaded).
 	 */
 	public static function init(): void {

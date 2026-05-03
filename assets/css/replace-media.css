@@ -1,3 +1,37 @@
 /**
  * WP Replace Media — CSS entry point.
  */
+
+.wp-replace-media-wrap .wp-replace-media-summary .inside {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.wp-replace-media-summary__preview img {
+	max-inline-size: 120px;
+	block-size: auto;
+}
+
+.wp-replace-media-summary__meta p {
+	margin-block: 0 6px;
+	margin-inline: 0;
+}
+
+#wp-replace-media-dropzone {
+	margin-block: 16px;
+	margin-inline: 0;
+	max-inline-size: 560px;
+}
+
+#wp-replace-media-dropzone .drag-drop-inside {
+	padding-block: 24px;
+	padding-inline: 16px;
+}
+
+@media (max-width: 782px) {
+	.wp-replace-media-wrap .wp-replace-media-summary .inside {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
