@@ -1,0 +1,21 @@
+{
+  "name": "wp-replace-media",
+  "version": "1.0.0",
+  "description": "Replace attachment files in-place while keeping URLs and thumbnails intact.",
+  "scripts": {
+    "start": "10up-toolkit start",
+    "build": "10up-toolkit build",
+    "lint:js": "10up-toolkit lint-js",
+    "lint:css": "10up-toolkit lint-style"
+  },
+  "devDependencies": {
+	"10up-toolkit": "6.5.1",
+    "prettier": "3.6.2",
+	"webpack": "5.103.0"
+  },
+  "10up-toolkit": {
+    "entry": {
+      "replace-media": "./assets/js/replace-media.js"
+    }
+  }
+}
