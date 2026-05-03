@@ -51,6 +51,34 @@ Yes. The uploaded temp file is read and written over the existing file via the W
 
 No automatic backup is created. Keep a local copy before replacing.
 
+## Hooks
+
+### `wp_replace_media_file_replaced`
+
+Fires after the file is written and before metadata regeneration.
+
+- Arguments: `$attachment_id`, `$file_path`, `$size_urls`
+- Use this hook to trigger cache purge or remote sync logic for third-party CDNs/offload tools.
+
+Example:
+
+```php
+add_action(
+	'wp_replace_media_file_replaced',
+	static function ( int $attachment_id, string $file_path, array $size_urls ): void {
+		unset( $attachment_id, $file_path );
+
+		foreach ( $size_urls as $url ) {
+			// Trigger your CDN/plugin purge for each URL.
+		}
+	},
+	10,
+	3
+);
+```
+
+Cloudflare and other API-driven CDNs usually require site-specific credentials and setup, so this hook is the recommended integration point instead of built-in direct API calls.
+
 ## Changelog
 
 ### 1.0.0

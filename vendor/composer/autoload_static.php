@@ -24,6 +24,7 @@ class ComposerStaticInit6f9d1e4436ffb9537db2c27f8c43d495
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'WP_Replace_Media\\Admin_Page' => __DIR__ . '/../..' . '/src/Admin_Page.php',
         'WP_Replace_Media\\Backup' => __DIR__ . '/../..' . '/src/Backup.php',
+        'WP_Replace_Media\\CDN' => __DIR__ . '/../..' . '/src/CDN.php',
         'WP_Replace_Media\\DB' => __DIR__ . '/../..' . '/src/DB.php',
         'WP_Replace_Media\\List_Table_Revisions' => __DIR__ . '/../..' . '/src/List_Table_Revisions.php',
         'WP_Replace_Media\\Plugin' => __DIR__ . '/../..' . '/src/Plugin.php',

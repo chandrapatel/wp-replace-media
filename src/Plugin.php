@@ -53,6 +53,7 @@ class Plugin {
 		add_action( 'init', [ $this, 'load_textdomain' ] );
 
 		( new Admin_Page( new Replacer() ) )->register();
+		( new CDN() )->register();
 		( new URL_Versioner() )->register();
 	}
 
